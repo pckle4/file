@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { peerService } from './services/peerService';
 import { 
@@ -923,8 +922,14 @@ const App: React.FC = () => {
       />
       <FloatingSendBar queue={fileQueue} peers={connectedPeers} onSend={processQueue} onClear={() => setFileQueue([])} />
       
-      <div className="absolute top-0 -left-40 w-96 h-96 bg-violet-200/40 dark:bg-violet-900/10 rounded-full blur-3xl pointer-events-none opacity-50" />
-      <div className="absolute top-40 right-0 w-72 h-72 bg-blue-200/40 dark:bg-blue-900/10 rounded-full blur-3xl pointer-events-none opacity-50" />
+      {/* Animated Lava Lamp Background */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-20 -left-20 w-[30rem] h-[30rem] bg-violet-300/30 dark:bg-violet-900/20 rounded-full blur-[100px] animate-blob mix-blend-multiply dark:mix-blend-screen" />
+          <div className="absolute top-20 right-0 w-[25rem] h-[25rem] bg-blue-300/30 dark:bg-blue-900/20 rounded-full blur-[100px] animate-blob animation-delay-2000 mix-blend-multiply dark:mix-blend-screen" />
+          <div className="absolute -bottom-20 left-40 w-[35rem] h-[35rem] bg-fuchsia-300/30 dark:bg-fuchsia-900/20 rounded-full blur-[100px] animate-blob animation-delay-4000 mix-blend-multiply dark:mix-blend-screen" />
+          {/* Subtle grid pattern overlay */}
+          <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 dark:opacity-5 mix-blend-soft-light" />
+      </div>
       
       <header className="w-full px-4 py-6 mb-4 flex items-center justify-between relative z-10 max-w-6xl mx-auto select-none pointer-events-none">
         <div className="flex items-center gap-3">
