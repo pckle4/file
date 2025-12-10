@@ -18,6 +18,7 @@ export const TransferList: React.FC<TransferListProps> = ({ transfers }) => {
   const groupedTransfers: { [key: string]: TransferItem[] } = {};
   const displayItems: { item: TransferItem, isGroup: boolean, peers: string[] }[] = [];
 
+  // 1. Sort into groups or single items
   activeTransfers.forEach(t => {
       if (t.direction === TransferDirection.OUTGOING && t.groupId) {
           if (!groupedTransfers[t.groupId]) {
@@ -30,7 +31,7 @@ export const TransferList: React.FC<TransferListProps> = ({ transfers }) => {
       }
   });
 
-  // Process groups
+  // 2. Process groups into single display items
   Object.keys(groupedTransfers).forEach(groupId => {
       const items = groupedTransfers[groupId];
       if (items.length > 0) {
@@ -45,7 +46,7 @@ export const TransferList: React.FC<TransferListProps> = ({ transfers }) => {
       }
   });
 
-  // Sort by start time descending
+  // 3. Sort by start time descending
   displayItems.sort((a, b) => b.item.startTime - a.item.startTime);
 
   return (
