@@ -185,6 +185,38 @@ class PeerService {
     return 0;
   }
 
+  async waitForBuffer(peerId: string): Promise<void> {
+    const conn = this.connections.get(peerId);
+    if (!conn || !conn.open || !conn.dataChannel) return Promise.resolve();
+
+    const channel = conn.dataChannel as any; // Cast to access RTCDataChannel properties directly
+    
+    // High watermark: 1MB. 
+    // This allows for significantly higher throughput on fast networks by queuing more data.
+    const MAX_BUFFER = 1024 * 1024; 
+
+    if (channel.bufferedAmount < MAX_BUFFER) return Promise.resolve();
+
+    return new Promise<void>((resolve) => {
+        const onLow = () => {
+            channel.removeEventListener('bufferedamountlow', onLow);
+            resolve();
+        };
+        channel.addEventListener('bufferedamountlow', onLow);
+        
+        // Low watermark: 512KB.
+        // Resume sending when the buffer is half empty. 
+        // This ensures the pipe remains active and prevents "stop-and-wait" behavior.
+        channel.bufferedAmountLowThreshold = 512 * 1024;
+        
+        // Safety check in case it drained while we were adding listeners
+        if (channel.bufferedAmount < channel.bufferedAmountLowThreshold) {
+            channel.removeEventListener('bufferedamountlow', onLow);
+            resolve();
+        }
+    });
+  }
+
   disconnectPeer(peerId: string) {
     this.handleClose(peerId);
   }
