@@ -1,0 +1,5 @@
+{
+  "name": "P2P-Share",
+  "description": "A modern, secure peer-to-peer file sharing application using WebRTC. Share files instantly between devices using a simple 6-digit code without cloud uploads.",
+  "requestFramePermissions": []
+}
