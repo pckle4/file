@@ -439,6 +439,10 @@ const App: React.FC = () => {
 
   const handleReconnect = (ids: string[]) => {
     setIsConnecting(true);
+    // Clear storage immediately on action to prevent re-prompting on refresh
+    // If reconnection succeeds, the peer is re-added to storage in handleIncomingData
+    clearRecentPeers(); 
+    
     ids.forEach(id => {
       if (id !== myId && !connectedPeers.find(p => p.id === id)) {
         peerService.connect(id);
@@ -458,7 +462,8 @@ const App: React.FC = () => {
       if (peerId) {
         peerService.disconnectPeer(peerId);
         setConnectedPeers(prev => prev.filter(p => p.id !== peerId));
-        // Do NOT remove from recent peers here to ensure persistence
+        // Remove from recent peers on manual disconnect
+        removeRecentPeer(peerId); 
       } else {
         peerService.destroy();
         setConnectedPeers([]);
