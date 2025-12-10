@@ -1,5 +1,4 @@
 
-
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { peerService } from './services/peerService';
 import { 
@@ -120,7 +119,8 @@ const App: React.FC = () => {
   
   const [settings, setSettings] = useState<AppSettings>({
     autoDownload: true, 
-    chunkSize: 65536, 
+    // 64KB is optimal for WebRTC DataChannels (reduces fragmentation/blocking)
+    chunkSize: 64 * 1024, 
     maxPeers: 5
   });
 
@@ -458,7 +458,7 @@ const App: React.FC = () => {
       if (peerId) {
         peerService.disconnectPeer(peerId);
         setConnectedPeers(prev => prev.filter(p => p.id !== peerId));
-        // We do NOT remove from recent peers here to ensure persistence
+        // Do NOT remove from recent peers here to ensure persistence
       } else {
         peerService.destroy();
         setConnectedPeers([]);
@@ -563,34 +563,34 @@ const App: React.FC = () => {
             worker.postMessage({ type: 'NEXT' });
         }
         else if (msg.type === 'CHUNK') {
-          // IMPLEMENT BACKPRESSURE
-          let buffered = peerService.getBufferedAmount(peerId);
-          // Wait if buffer is too full (64KB threshold)
-          while (buffered > 64 * 1024) {
-             await new Promise(r => setTimeout(r, 50));
-             buffered = peerService.getBufferedAmount(peerId);
-          }
+          // IMPLEMENT BACKPRESSURE via Event Listener (Non-Blocking for background tabs)
+          try {
+             await peerService.waitForBuffer(peerId);
+             
+             peerService.sendTo(peerId, {
+                type: 'CHUNK',
+                transferId,
+                data: msg.data
+             } as ProtocolMessage);
 
-          peerService.sendTo(peerId, {
-            type: 'CHUNK',
-            transferId,
-            data: msg.data
-          } as ProtocolMessage);
-
-          const offset = msg.offset + msg.data.byteLength;
-          const now = Date.now();
-          const lastUpdate = lastProgressUpdate.current[transferId] || 0;
-          
-          if (now - lastUpdate > 100 || offset >= file.size) {
-            const progress = Math.min(100, (offset / file.size) * 100);
-            setActiveTransfers(prev => prev.map(t => 
-              t.id === transferId ? { ...t, progress } : t
-            ));
-            lastProgressUpdate.current[transferId] = now;
+             const offset = msg.offset + msg.data.byteLength;
+             const now = Date.now();
+             const lastUpdate = lastProgressUpdate.current[transferId] || 0;
+             
+             if (now - lastUpdate > 100 || offset >= file.size) {
+                const progress = Math.min(100, (offset / file.size) * 100);
+                setActiveTransfers(prev => prev.map(t => 
+                t.id === transferId ? { ...t, progress } : t
+                ));
+                lastProgressUpdate.current[transferId] = now;
+             }
+             
+             // Request next chunk only after buffer check passed
+             worker.postMessage({ type: 'NEXT' });
+          } catch(err) {
+              console.error("Backpressure error:", err);
+              worker.terminate();
           }
-          
-          // Request next chunk only after buffer check passed
-          worker.postMessage({ type: 'NEXT' });
 
         } else if (msg.type === 'END') {
            peerService.sendTo(peerId, { type: 'END', transferId } as ProtocolMessage);
@@ -608,6 +608,14 @@ const App: React.FC = () => {
            delete lastProgressUpdate.current[transferId];
            addToast('success', 'Sent', `${file.name} sent successfully!`);
         }
+      };
+      
+      worker.onerror = (e) => {
+          console.error("Worker error:", e);
+          worker.terminate();
+           setActiveTransfers(prev => prev.map(t => 
+            t.id === transferId ? { ...t, status: TransferStatus.FAILED } : t
+          ));
       };
 
       worker.postMessage({ type: 'INIT', file, chunkSize: settings.chunkSize });
@@ -1141,37 +1149,43 @@ const App: React.FC = () => {
                        </div>
                     </div>
                     <div className="bg-white dark:bg-neutral-900 p-5 rounded-2xl border border-slate-200 dark:border-neutral-800 shadow-sm flex items-center gap-4 relative overflow-hidden group">
-                       <div className="absolute inset-0 bg-gradient-to-r from-cyan-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 dark:from-cyan-900/20" />
-                       <div className="p-3 rounded-xl bg-cyan-50 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400 relative z-10 group-hover:scale-110 transition-transform">
-                          <Users className="w-6 h-6" />
-                       </div>
-                       <div className="relative z-10">
-                          <div className="text-xs font-bold text-slate-400 uppercase">Unique Peers</div>
-                          <div className="text-lg font-black text-slate-900 dark:text-white flex items-center gap-1">
-                            {analytics.uniquePeers}
-                          </div>
-                       </div>
-                    </div>
-                    <div className="bg-white dark:bg-neutral-900 p-5 rounded-2xl border border-slate-200 dark:border-neutral-800 shadow-sm flex items-center gap-4 relative overflow-hidden group">
-                       <div className="absolute inset-0 bg-gradient-to-r from-emerald-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 dark:from-emerald-900/20" />
-                       <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 relative z-10 group-hover:scale-110 transition-transform">
-                          <Zap className="w-6 h-6" />
+                       <div className="absolute inset-0 bg-gradient-to-r from-blue-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 dark:from-blue-900/20" />
+                       <div className="p-3 rounded-xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 relative z-10 group-hover:scale-110 transition-transform">
+                          <Activity className="w-6 h-6" />
                        </div>
                        <div className="relative z-10">
                           <div className="text-xs font-bold text-slate-400 uppercase">Success Rate</div>
                           <div className="text-lg font-black text-slate-900 dark:text-white flex items-center gap-1">
-                            {Math.round(analytics.successRate)}%
+                            {analytics.successRate.toFixed(0)}%
+                          </div>
+                       </div>
+                    </div>
+                    <div className="bg-white dark:bg-neutral-900 p-5 rounded-2xl border border-slate-200 dark:border-neutral-800 shadow-sm flex items-center gap-4 relative overflow-hidden group">
+                       <div className="absolute inset-0 bg-gradient-to-r from-violet-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 dark:from-violet-900/20" />
+                       <div className="p-3 rounded-xl bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 relative z-10 group-hover:scale-110 transition-transform">
+                          <TrendingUp className="w-6 h-6" />
+                       </div>
+                       <div className="relative z-10">
+                          <div className="text-xs font-bold text-slate-400 uppercase">Total Traffic</div>
+                          <div className="text-lg font-black text-slate-900 dark:text-white flex items-center gap-1">
+                            {formatFileSize(analytics.sentBytes + analytics.receivedBytes)}
                           </div>
                        </div>
                     </div>
                  </div>
               )}
            </div>
+           
+           {/* Reconnection Modal */}
+           <ReconnectionModal 
+              candidates={reconnectCandidates} 
+              onReconnect={handleReconnect}
+              onDiscard={handleDiscardReconnect} 
+           />
         </div>
       </main>
-      
+
       <Footer />
-      {!isTabLocked && <ReconnectionModal candidates={reconnectCandidates} onReconnect={handleReconnect} onDiscard={handleDiscardReconnect} />}
     </div>
   );
 };
