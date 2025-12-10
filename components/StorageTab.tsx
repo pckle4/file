@@ -256,26 +256,26 @@ export const StorageTab: React.FC<StorageTabProps> = ({ onCleanup }) => {
   return (
     <div className="space-y-6 animate-slide-up pb-8">
       <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-3xl shadow-sm overflow-hidden">
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
             <div className="flex items-center gap-4">
-              <div className="p-3 bg-gradient-to-br from-violet-100 to-purple-50 dark:from-violet-900/30 dark:to-purple-900/30 rounded-2xl shadow-sm border border-violet-100 dark:border-violet-800">
+              <div className="p-3 bg-gradient-to-br from-violet-100 to-purple-50 dark:from-violet-900/30 dark:to-purple-900/30 rounded-2xl shadow-sm border border-violet-100 dark:border-violet-800 flex-shrink-0">
                 <Database className="h-8 w-8 text-violet-600 dark:text-violet-400" />
               </div>
-              <div>
-                <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">Storage Inspector</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2 mt-1 font-medium">
-                  <Activity className="h-3 w-3 text-emerald-500" />
+              <div className="min-w-0">
+                <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight truncate">Storage Inspector</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2 mt-1 font-medium truncate">
+                  <Activity className="h-3 w-3 text-emerald-500 flex-shrink-0" />
                   System Active • Updated {lastUpdateTime.toLocaleTimeString()}
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-3">
-               <Button size="sm" variant="secondary" onClick={analyzeStorage} disabled={isLoading} className="rounded-full px-4 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-600">
+            <div className="flex flex-wrap items-center gap-3">
+               <Button size="sm" variant="secondary" onClick={analyzeStorage} disabled={isLoading} className="rounded-full px-4 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-600 w-full sm:w-auto">
                  <RefreshCw className={cn("w-4 h-4 mr-2", isLoading && "animate-spin")} />
                  Refresh
                </Button>
-               <div className="px-4 py-2 bg-slate-900 dark:bg-violet-600 text-white rounded-full text-xs font-bold shadow-lg shadow-slate-900/20 dark:shadow-violet-900/20 flex items-center gap-2">
+               <div className="px-4 py-2 bg-slate-900 dark:bg-violet-600 text-white rounded-full text-xs font-bold shadow-lg shadow-slate-900/20 dark:shadow-violet-900/20 flex items-center justify-center gap-2 w-full sm:w-auto">
                  <Archive className="h-3 w-3" />
                  {formatFileSize(totalSize)} Total
                </div>
@@ -283,10 +283,10 @@ export const StorageTab: React.FC<StorageTabProps> = ({ onCleanup }) => {
           </div>
 
           {browserStorage.supported && (
-            <div className="mb-8 p-6 bg-slate-50/80 dark:bg-slate-900/50 rounded-3xl border border-slate-100 dark:border-slate-700 relative overflow-hidden">
-              <div className="flex items-center justify-between mb-4 relative z-10">
+            <div className="mb-8 p-4 sm:p-6 bg-slate-50/80 dark:bg-slate-900/50 rounded-3xl border border-slate-100 dark:border-slate-700 relative overflow-hidden">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 relative z-10">
                 <span className="font-bold text-sm text-slate-700 dark:text-slate-200 uppercase tracking-wider">Browser Storage Quota</span>
-                <div className={cn("px-3 py-1 rounded-full text-xs font-bold border flex items-center gap-1.5 shadow-sm bg-slate-100 dark:bg-slate-800")}>
+                <div className={cn("px-3 py-1 rounded-full text-xs font-bold border flex items-center gap-1.5 shadow-sm bg-slate-100 dark:bg-slate-800 w-fit")}>
                    {usagePercent < 90 ? <CheckCircle className="h-3 w-3 text-emerald-500" /> : <AlertCircle className="h-3 w-3 text-amber-500" />}
                    {usagePercent.toFixed(2)}% Used
                 </div>
@@ -294,24 +294,24 @@ export const StorageTab: React.FC<StorageTabProps> = ({ onCleanup }) => {
               <div className="h-4 bg-white dark:bg-slate-800 rounded-full overflow-hidden mb-6 shadow-inner border border-slate-100 dark:border-slate-700 relative z-10">
                 <div className={cn("h-full rounded-full transition-all duration-1000 ease-out shadow-sm bg-gradient-to-r from-emerald-400 to-emerald-500")} style={{ width: `${Math.max(usagePercent, 1)}%` }} />
               </div>
-              <div className="grid grid-cols-3 gap-4 relative z-10">
-                <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200/60 dark:border-slate-700 shadow-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 relative z-10">
+                <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200/60 dark:border-slate-700 shadow-sm flex flex-row sm:flex-col items-center sm:items-start justify-between sm:justify-center">
                   <span className="text-slate-400 text-[10px] font-black uppercase tracking-widest">Used</span>
-                  <div className="font-mono font-bold text-lg text-slate-800 dark:text-white mt-1">{formatFileSize(browserStorage.usage)}</div>
+                  <div className="font-mono font-bold text-lg text-slate-800 dark:text-white mt-0 sm:mt-1">{formatFileSize(browserStorage.usage)}</div>
                 </div>
-                <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200/60 dark:border-slate-700 shadow-sm">
+                <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200/60 dark:border-slate-700 shadow-sm flex flex-row sm:flex-col items-center sm:items-start justify-between sm:justify-center">
                   <span className="text-slate-400 text-[10px] font-black uppercase tracking-widest">Total</span>
-                  <div className="font-mono font-bold text-lg text-slate-800 dark:text-white mt-1">{formatFileSize(browserStorage.quota)}</div>
+                  <div className="font-mono font-bold text-lg text-slate-800 dark:text-white mt-0 sm:mt-1">{formatFileSize(browserStorage.quota)}</div>
                 </div>
-                <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200/60 dark:border-slate-700 shadow-sm">
+                <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200/60 dark:border-slate-700 shadow-sm flex flex-row sm:flex-col items-center sm:items-start justify-between sm:justify-center">
                   <span className="text-slate-400 text-[10px] font-black uppercase tracking-widest">Free</span>
-                  <div className="font-mono font-bold text-lg text-emerald-600 dark:text-emerald-400 mt-1">{formatFileSize(browserStorage.quota - browserStorage.usage)}</div>
+                  <div className="font-mono font-bold text-lg text-emerald-600 dark:text-emerald-400 mt-0 sm:mt-1">{formatFileSize(browserStorage.quota - browserStorage.usage)}</div>
                 </div>
               </div>
             </div>
           )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
             <div className="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all group">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
@@ -336,12 +336,12 @@ export const StorageTab: React.FC<StorageTabProps> = ({ onCleanup }) => {
               </div>
               {largestConsumers[0] && (
                  <div className="flex items-center gap-4 p-3 bg-slate-50 dark:bg-slate-700 rounded-2xl border border-slate-100 dark:border-slate-600">
-                    <div className={cn("p-2 rounded-xl", largestConsumers[0].bg, largestConsumers[0].color)}>
+                    <div className={cn("p-2 rounded-xl flex-shrink-0", largestConsumers[0].bg, largestConsumers[0].color)}>
                        {React.createElement(largestConsumers[0].icon, { className: "w-5 h-5" })}
                     </div>
-                    <div>
-                       <div className="font-bold text-slate-800 dark:text-white text-sm">{largestConsumers[0].name}</div>
-                       <div className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">{totalSize > 0 ? ((largestConsumers[0].size / totalSize) * 100).toFixed(1) : 0}% of total storage</div>
+                    <div className="min-w-0">
+                       <div className="font-bold text-slate-800 dark:text-white text-sm truncate">{largestConsumers[0].name}</div>
+                       <div className="text-[10px] text-slate-500 dark:text-slate-400 font-medium truncate">{totalSize > 0 ? ((largestConsumers[0].size / totalSize) * 100).toFixed(1) : 0}% of total storage</div>
                     </div>
                  </div>
               )}
@@ -356,15 +356,15 @@ export const StorageTab: React.FC<StorageTabProps> = ({ onCleanup }) => {
                { key: 'cookies', label: 'Cookies', icon: Cookie, color: 'text-orange-600 dark:text-orange-400', bg: 'bg-orange-50 dark:bg-orange-900/30', data: storageData.cookies, size: storageSizes.cookies }
              ].map((item) => (
                <div key={item.key} className="border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden bg-white dark:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600 transition-colors shadow-sm">
-                  <button onClick={() => toggleExpanded(item.key)} className="w-full flex items-center justify-between p-5 hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-colors text-left group">
+                  <button onClick={() => toggleExpanded(item.key)} className="w-full flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-5 hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-colors text-left group gap-4">
                     <div className="flex items-center gap-4">
-                      <div className={cn("p-2.5 rounded-xl transition-colors", item.bg, item.color)}><item.icon className="w-5 h-5" /></div>
+                      <div className={cn("p-2.5 rounded-xl transition-colors flex-shrink-0", item.bg, item.color)}><item.icon className="w-5 h-5" /></div>
                       <div>
                         <div className="text-sm font-bold text-slate-800 dark:text-slate-200 group-hover:text-slate-900 dark:group-hover:text-white">{item.label}</div>
                         <div className="text-xs text-slate-500 dark:text-slate-400">{Object.keys(item.data).length} items</div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center justify-between sm:justify-end gap-4 pl-14 sm:pl-0">
                       <span className="text-xs font-mono font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 px-2.5 py-1 rounded-lg">{formatFileSize(item.size)}</span>
                       <div className={cn("p-1 rounded-full bg-slate-50 dark:bg-slate-700 text-slate-400 transition-all duration-300", expandedItems.has(item.key) && "rotate-180 bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-200")}><ChevronDown className="w-4 h-4" /></div>
                     </div>
@@ -380,15 +380,15 @@ export const StorageTab: React.FC<StorageTabProps> = ({ onCleanup }) => {
                </div>
              ))}
              <div className="border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden bg-white dark:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600 transition-colors shadow-sm">
-                <button onClick={() => toggleExpanded("indexedDB")} className="w-full flex items-center justify-between p-5 hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-colors text-left group">
+                <button onClick={() => toggleExpanded("indexedDB")} className="w-full flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-5 hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-colors text-left group gap-4">
                   <div className="flex items-center gap-4">
-                    <div className="p-2.5 bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-xl transition-colors"><Server className="w-5 h-5" /></div>
+                    <div className="p-2.5 bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-xl transition-colors flex-shrink-0"><Server className="w-5 h-5" /></div>
                     <div>
                       <div className="text-sm font-bold text-slate-800 dark:text-slate-200 group-hover:text-slate-900 dark:group-hover:text-white">IndexedDB</div>
                       <div className="text-xs text-slate-500 dark:text-slate-400">{storageData.indexedDB.databases.length} databases</div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center justify-between sm:justify-end gap-4 pl-14 sm:pl-0">
                     <span className="text-xs font-mono font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 px-2.5 py-1 rounded-lg">{formatFileSize(storageSizes.indexedDB)}</span>
                     <div className={cn("p-1 rounded-full bg-slate-50 dark:bg-slate-700 text-slate-400 transition-all duration-300", expandedItems.has("indexedDB") && "rotate-180 bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-200")}><ChevronDown className="w-4 h-4" /></div>
                   </div>
@@ -425,14 +425,14 @@ export const StorageTab: React.FC<StorageTabProps> = ({ onCleanup }) => {
       </div>
       <div className="bg-white dark:bg-slate-800 border border-red-100 dark:border-red-900/30 rounded-3xl p-6 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-sm relative overflow-hidden group">
          <div className="absolute top-0 left-0 w-1 h-full bg-red-500" />
-         <div className="flex items-center gap-5 relative z-10">
-            <div className="p-4 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-2xl group-hover:scale-110 transition-transform"><Trash2 className="w-6 h-6" /></div>
+         <div className="flex items-center gap-5 relative z-10 w-full sm:w-auto">
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-2xl group-hover:scale-110 transition-transform flex-shrink-0"><Trash2 className="w-6 h-6" /></div>
             <div>
                <h4 className="font-bold text-slate-900 dark:text-white text-lg">Emergency Cleanup</h4>
                <p className="text-sm text-slate-500 dark:text-slate-400 max-w-md">Permanently delete all file data stored by NW in IndexedDB.</p>
             </div>
          </div>
-         <Button variant="danger" onClick={onCleanup} className="whitespace-nowrap shadow-lg shadow-red-500/10 border-transparent bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-600 hover:text-white transition-all">Clear Storage</Button>
+         <Button variant="danger" onClick={onCleanup} className="w-full sm:w-auto whitespace-nowrap shadow-lg shadow-red-500/10 border-transparent bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-600 hover:text-white transition-all">Clear Storage</Button>
       </div>
     </div>
   );
