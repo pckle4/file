@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { peerService } from './services/peerService';
 import { 
@@ -557,13 +558,14 @@ const App: React.FC = () => {
       
       worker.onmessage = async (e) => {
         const msg = e.data as any;
+        
         if (msg.type === 'READY') {
             worker.postMessage({ type: 'NEXT' });
         }
         else if (msg.type === 'CHUNK') {
-          // Check for backpressure
+          // IMPLEMENT BACKPRESSURE
           let buffered = peerService.getBufferedAmount(peerId);
-          // 64KB threshold
+          // Wait if buffer is too full (64KB threshold)
           while (buffered > 64 * 1024) {
              await new Promise(r => setTimeout(r, 50));
              buffered = peerService.getBufferedAmount(peerId);
@@ -587,6 +589,7 @@ const App: React.FC = () => {
             lastProgressUpdate.current[transferId] = now;
           }
           
+          // Request next chunk only after buffer check passed
           worker.postMessage({ type: 'NEXT' });
 
         } else if (msg.type === 'END') {
