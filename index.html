@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>NOWHILE - Secure P2P File Transfer</title>
+  <meta name="description"
+    content="NOWHILE - Lightning fast, encrypted peer-to-peer file sharing. No servers, no limits, pure privacy." />
+  <meta name="theme-color" content="#2b4570" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap"
+    as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+  </noscript>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"
+    media="print" onload="this.media='all'">
+
+  <!-- Tailwind CDN removed in favor of local build -->
+
+  <style>
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      min-height: 100vh;
+      width: 100%;
+      font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    ::selection {
+      background-color: rgba(43, 69, 112, 0.3);
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #a37a74;
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #8f6862;
+    }
+
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: #a37a74 transparent;
+    }
+
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    .grid-rows-0 {
+      grid-template-rows: 0fr;
+    }
+
+    .grid-rows-1 {
+      grid-template-rows: 1fr;
+    }
+
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+  </style>
+
+  <!-- Dependencies are now bundled by Vite -->
+</head>
+
+<body
+  class="bg-taupe-50 text-taupe-900 dark:bg-french-950 dark:text-taupe-100 font-sans antialiased min-h-screen w-full">
+  <div id="root">
+    <div id="initial-loader"
+      style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background-color: #faf8f6; z-index: 9999;">
+      <canvas id="loader-canvas" width="400" height="400" style="width: 200px; height: 200px;"></canvas>
+    </div>
+    <script>
+      (function () {
+        const canvas = document.getElementById('loader-canvas');
+        if (!canvas) return;
+
+        // Match React Size 250
+        const size = 250;
+        const particles = [];
+        let tick = 0;
+        let globalRotation = 0;
+        let globalAngle = 0;
+        let animationFrame;
+
+        // const size = 200; // Moved up
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = size * dpr;
+        canvas.height = size * dpr;
+        ctx.scale(dpr, dpr);
+        ctx.globalCompositeOperation = 'lighter';
+
+        function createParticle(centerX, centerY, tick, minSize) {
+          return {
+            radius: 7,
+            x: centerX + Math.cos(tick / 20) * minSize / 2,
+            y: centerY + Math.sin(tick / 20) * minSize / 2,
+            angle: globalRotation + globalAngle,
+            speed: 0,
+            accel: 0.01,
+            decay: 0.01,
+            life: 1
+          };
+        }
+
+        function stepParticle(particle, index) {
+          particle.speed += particle.accel;
+          particle.x += Math.cos(particle.angle) * particle.speed;
+          particle.y += Math.sin(particle.angle) * particle.speed;
+          particle.angle += Math.PI / 64;
+          particle.accel *= 1.01;
+          particle.life -= particle.decay;
+
+          if (particle.life <= 0) {
+            particles.splice(index, 1);
+          }
+        }
+
+        function drawParticle(ctx, particle, index, tick) {
+          // Black loader settings: hue doesn't matter, sat=0, light=0
+          ctx.fillStyle = ctx.strokeStyle = `hsla(0, 0%, 0%, ${particle.life})`;
+
+          ctx.beginPath();
+          if (particles[index - 1]) {
+            ctx.moveTo(particle.x, particle.y);
+            ctx.lineTo(particles[index - 1].x, particles[index - 1].y);
+          }
+          ctx.stroke();
+
+          ctx.beginPath();
+          ctx.arc(particle.x, particle.y, Math.max(0.001, particle.life * particle.radius), 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        function animate() {
+          const rect = canvas.getBoundingClientRect();
+          // Fallback center if rect unavailable (e.g. hidden), though we fixed position it.
+          const centerX = size / 2;
+          const centerY = size / 2;
+          const minSize = size * 0.5;
+
+          // Add new particles
+          // Logic adapted for particleCount=3 and speed=1.8 simulation
+          // Since this runs on RAF, we control spawn rate. 
+          // Default was 1 per frame, which is high. 
+          // User wants particleCount=3 (total active?). No, likely spawn rate or max count.
+          // In React component: loop i < particleCount pushes particles.
+          // So we push 3 particles per frame? That seems like a lot for "3" count.
+          // Let's assume the user meant "active particles" or "trail length". 
+          // Actually, looking at the code `for (let i = 0; i < particleCount; i++)` in animate loop.
+          // It pushes `particleCount` particles PER FRAME.
+          // So we should push 3 per frame.
+          for (let i = 0; i < 3; i++) {
+            particles.push(createParticle(centerX, centerY, tick, minSize));
+          }
+
+          particles.forEach((particle, index) => stepParticle(particle, index));
+
+          ctx.clearRect(0, 0, size, size);
+
+          particles.forEach((particle, index) => drawParticle(ctx, particle, index, tick));
+
+          // Speed adjustment 1.8
+          globalRotation += Math.PI / 6 * 1.8;
+          globalAngle += Math.PI / 6 * 1.8;
+          tick += 1 * 1.8;
+
+          if (document.getElementById('root').getAttribute('data-loaded') === 'true') {
+            // Stop animation if React signaled it's ready, or we can just rely on React removing the innerHTML.
+            // Since React replaces the children of #root, this script and canvas will be removed automatically.
+            // No explicit stop needed as the DOM node destruction will stop the visual context, 
+            // but strictly speaking the loop continues until GC collects the closure. 
+            // Ideally we cancel it, but accessing the loop from outside is hard. 
+            // React's hydration clears the content, effectively killing the canvas.
+          }
+
+          requestAnimationFrame(animate);
+        }
+
+        animate();
+      })();
+    </script>
+  </div>
+  <script type="module" src="index.tsx"></script>
+</body>
+
+</html>

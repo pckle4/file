@@ -1,0 +1,112 @@
+@import "tailwindcss";
+@config "./tailwind.config.js";
+
+@layer components {
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: #000000;
+        @apply dark:bg-black bg-white;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background-color: #404040;
+        border-radius: 9999px;
+        border: 2px solid #000000;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background-color: #525252;
+    }
+
+    * {
+        scrollbar-width: thin;
+        scrollbar-color: #404040 #000000;
+    }
+
+    /* Utilities */
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+
+    .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
+    /* Animation Utilities */
+    .animate-delay-100 {
+        animation-delay: 100ms;
+    }
+
+    .animate-delay-200 {
+        animation-delay: 200ms;
+    }
+
+    .animate-delay-300 {
+        animation-delay: 300ms;
+    }
+}
+
+/* Custom Animations */
+@keyframes magnetic {
+    0% {
+        transform: translate(0, 0) scale(1);
+    }
+
+    25% {
+        transform: translate(10px, -15px) scale(1.02);
+    }
+
+    50% {
+        transform: translate(-5px, 10px) scale(0.98);
+    }
+
+    75% {
+        transform: translate(-15px, -5px) scale(1.01);
+    }
+
+    100% {
+        transform: translate(0, 0) scale(1);
+    }
+}
+
+.animate-magnetic {
+    animation: magnetic 8s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+.animate-shimmer {
+    background-size: 200% 100%;
+    animation: shimmer 2.5s linear infinite;
+}
+
+@keyframes text-glow {
+
+    0%,
+    100% {
+        text-shadow: 0 0 10px rgba(237, 106, 90, 0.5);
+    }
+
+    50% {
+        text-shadow: 0 0 30px rgba(237, 106, 90, 0.8), 0 0 60px rgba(237, 106, 90, 0.4);
+    }
+}
+
+.animate-text-glow {
+    animation: text-glow 3s ease-in-out infinite;
+}
